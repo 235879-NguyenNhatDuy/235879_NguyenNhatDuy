@@ -12,7 +12,7 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Đã kết nối MongoDB Atlas thành công'))
   .catch(err => console.error('Lỗi kết nối MongoDB:', err));
 
-// Schema & Model Device
+// Định nghĩa Schema & Model Device
 const deviceSchema = new mongoose.Schema({
   deviceId: { type: String, required: true, unique: true },
   name: { type: String, required: true },
@@ -32,12 +32,12 @@ const deviceSchema = new mongoose.Schema({
 
 const Device = mongoose.model('Device', deviceSchema, 'devices');
 
-// Endpoint /health kiểm tra trạng thái backend
+// 1. GET /health - Kiểm tra trạng thái hoạt động backend
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Backend API đang hoạt động bình thường' });
 });
 
-// GET /api/devices - Lấy danh sách & Tìm kiếm (?search=...)
+// 2. GET /api/devices - Lấy danh sách & Tìm kiếm thiết bị (?search=...)
 app.get('/api/devices', async (req, res) => {
   try {
     const { search } = req.query;
@@ -60,7 +60,7 @@ app.get('/api/devices', async (req, res) => {
   }
 });
 
-// GET /api/devices/:id - Xem chi tiết thiết bị
+// 3. GET /api/devices/:id - Xem chi tiết một thiết bị
 app.get('/api/devices/:id', async (req, res) => {
   try {
     const device = await Device.findById(req.params.id);
@@ -73,12 +73,12 @@ app.get('/api/devices/:id', async (req, res) => {
   }
 });
 
-// POST /api/devices - Thêm thiết bị mới (Validate & Kiểm tra trùng deviceId)
+// 4. POST /api/devices - Thêm thiết bị mới (Validate & Kiểm tra trùng deviceId)
 app.post('/api/devices', async (req, res) => {
   try {
     const { deviceId, name, deviceType, room } = req.body;
     if (!deviceId || !name || !deviceType || !room) {
-      return res.status(400).json({ message: 'Vui lòng điền đầy đủ các trường bắt buộc (deviceId, name, deviceType, room)' });
+      return res.status(400).json({ message: 'Vui lòng điền đầy đủ deviceId, name, deviceType, room' });
     }
 
     const existingDevice = await Device.findOne({ deviceId });
@@ -94,7 +94,7 @@ app.post('/api/devices', async (req, res) => {
   }
 });
 
-// PUT /api/devices/:id - Cập nhật thiết bị
+// 5. PUT /api/devices/:id - Cập nhật thông tin thiết bị
 app.put('/api/devices/:id', async (req, res) => {
   try {
     const updatedDevice = await Device.findByIdAndUpdate(
@@ -111,7 +111,7 @@ app.put('/api/devices/:id', async (req, res) => {
   }
 });
 
-// DELETE /api/devices/:id - Xóa thiết bị
+// 6. DELETE /api/devices/:id - Xóa thiết bị
 app.delete('/api/devices/:id', async (req, res) => {
   try {
     const deletedDevice = await Device.findByIdAndDelete(req.params.id);
